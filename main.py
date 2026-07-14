@@ -107,10 +107,10 @@ def main() -> int:
             dbSha1 = getDBChecksum(id)
 
             if diskSha1 == dbSha1:
-                log(f"Checksum match{path} - skipping:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+                log(f"Checksum match {path} - skipping:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
                 continue
 
-            log(f"Checksum mismatch{path}:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+            log(f"Checksum mismatch {path}:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
             match input("Update DB? [y/N]").lower():
                 case "y":
                     updateDBChecksum(id, diskSha1)
