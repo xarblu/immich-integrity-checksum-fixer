@@ -31,6 +31,8 @@ def dbQuery(query: str) -> Any:
     I know this is a comically bad way to do it
     but it requires no libraries and is simple
     """
+    wrap = ["podman", "exec", "-i", "systemd-immich-database"]
+
     cmd = [
         "psql",
         "-U", "postgres",
@@ -38,7 +40,8 @@ def dbQuery(query: str) -> Any:
         "--no-align", "--field-separator-zero",
         "--command", query
     ]
-    proc = subprocess.run(cmd, check=True, text=True)
+
+    proc = subprocess.run(wrap + cmd, check=True, text=True)
 
     rows: list[str] = proc.stdout.splitlines()
 
