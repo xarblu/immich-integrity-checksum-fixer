@@ -84,12 +84,13 @@ def dbAsset(id: str) -> dict:
 
 
 def main() -> int:
-    report = csv.DictReader(sys.stdin)
+    with open(sys.argv[1], newline='') as fd:
+        report = csv.DictReader(fd)
 
-    for row in report:
-        print(row)
-        asset = dbAsset(row["assetId"])
-        print(asset)
+        for row in report:
+            print(row)
+            asset = dbAsset(row["assetId"])
+            print(asset)
 
     return 0
 
