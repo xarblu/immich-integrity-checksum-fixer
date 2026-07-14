@@ -83,8 +83,7 @@ def dbChecksum(id: str) -> str:
     if len(assets) != 1:
         raise ValueError(f"Query returned {len(assets)} assets")
 
-    log(assets)
-    return assets[0]["checksum"]
+    return assets[0]["encode"]
 
 
 def main() -> int:
