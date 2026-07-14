@@ -10,7 +10,6 @@ import hashlib
 import subprocess
 import csv
 import sys
-import argparse
 
 from typing import Any
 
@@ -19,7 +18,7 @@ def log(*args: Any) -> None:
     print(*args, file=sys.stderr)
 
 
-def sha1sum(path: pathlib.Path) -> str | None:
+def sha1sum(path: pathlib.Path) -> str:
     sha1 = hashlib.sha1()
 
     with path.open("rb") as fd:
@@ -63,6 +62,7 @@ def dbQuery(query: str) -> Any:
             fields = [x.decode() for x in row.split(b"\0")]
             continue
 
+        # last is always row counter of some sort
         if i >= len(rows) - 1:
             break
 
@@ -72,7 +72,7 @@ def dbQuery(query: str) -> Any:
     return records
 
 
-def dbChecksum(id: str) -> str:
+def getDBChecksum(id: str) -> str:
     """
     Fetch the assets checksum from the database
     """
@@ -86,17 +86,36 @@ def dbChecksum(id: str) -> str:
     return assets[0]["encode"]
 
 
+def updateDBChecksum(id: str, checksum: str) -> None:
+    """
+    Update the checkum in the DB
+    """
+
+    log("UPDATE \"asset\" "
+        f"SET \"checksum\" = decode('{checksum}', 'hex') "
+        f"WHERE \"id\" = '{id}';")
+
+
 def main() -> int:
     with open(sys.argv[1], newline='') as fd:
         report = csv.DictReader(fd)
 
         for row in report:
+            id = row["assetId"]
             path = pathlib.Path(row["path"])
             diskSha1 = sha1sum(path)
-            dbSha1 = dbChecksum(row["assetId"])
+            dbSha1 = getDBChecksum(id)
 
-            if diskSha1 != dbSha1:
-                log(f"Checksum mismatch:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+            if diskSha1 == dbSha1:
+                log(f"Checksum match{path} - skipping:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+                continue
+
+            log(f"Checksum mismatch{path}:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+            match input("Update DB? [y/N]").lower():
+                case "y":
+                    updateDBChecksum(id, diskSha1)
+                case _:
+                    pass
 
     return 0
 
