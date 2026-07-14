@@ -49,11 +49,6 @@ def dbQuery(query: str) -> Any:
 
     rows: list[bytes] = proc.stdout.splitlines()
 
-    # at least header + row count
-    if len(rows) < 2:
-        raise ValueError("psql did not return at least 2 rows"
-                         " (header + row count)")
-
     fields: list[str] = []
     records: list[dict[str, str]] = []
 
