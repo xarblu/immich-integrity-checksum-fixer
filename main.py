@@ -41,9 +41,9 @@ def dbQuery(query: str) -> Any:
         "--command", query
     ]
 
-    proc = subprocess.run(wrap + cmd, check=True, text=True)
+    proc = subprocess.run(wrap + cmd, check=True, capture_output=True)
 
-    rows: list[str] = proc.stdout.splitlines()
+    rows: list[bytes] = proc.stdout.splitlines()
 
     # at least header + row count
     if len(rows) < 2:
@@ -55,13 +55,13 @@ def dbQuery(query: str) -> Any:
 
     for i, row in enumerate(rows):
         if i <= 0:
-            fields = row.split("\0")
+            fields = [x.decode() for x in row.split(b"\0")]
             continue
 
         if i >= len(rows) - 1:
             break
 
-        records.append({x[0]: x[1] for x in zip(fields, row.split("\0"))})
+        records.append({x[0]: x[1].decode() for x in zip(fields, row.split(b"\0"))})
 
     return records
 
