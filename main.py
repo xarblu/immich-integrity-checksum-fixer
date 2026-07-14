@@ -16,7 +16,7 @@ from typing import Any
 
 
 def log(*args: Any) -> None:
-    print(args, file=sys.stderr)
+    print(*args, file=sys.stderr)
 
 
 def sha1sum(path: pathlib.Path) -> str | None:
