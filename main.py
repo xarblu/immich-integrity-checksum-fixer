@@ -85,6 +85,7 @@ def updateDBChecksum(id: str, checksum: str) -> None:
     """
     Update the checkum in the DB
     """
+    log(f"Updating DB checksum to {checksum}...")
 
     dbQuery("UPDATE \"asset\" "
             f"SET \"checksum\" = decode('{checksum}', 'hex') "
@@ -119,7 +120,8 @@ def main() -> int:
                 case "y":
                     updateDBChecksum(id, diskSha1)
                 case _:
-                    pass
+                    log("Skipping...")
+                    continue
 
     return 0
 
