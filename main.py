@@ -96,7 +96,7 @@ def main() -> int:
             dbSha1 = dbChecksum(row["assetId"])
 
             if diskSha1 != dbSha1:
-                log(f"Checksum mismatch:\n  DB: {dbSha1}\n  Disk: {diskSha1}")
+                log(f"Checksum mismatch:\n  DB:    {dbSha1}\n  Disk: {diskSha1}")
 
     return 0
 
