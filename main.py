@@ -14,6 +14,10 @@ import sys
 from typing import Any
 
 
+def log(*args: Any) -> None:
+    print(args, file=sys.stderr)
+
+
 def sha1sum(path: pathlib.Path) -> str | None:
     sha1 = hashlib.sha1()
 
@@ -33,7 +37,7 @@ def dbQuery(query: str) -> Any:
     """
     wrap = ["podman", "exec", "-i", "systemd-immich-database"]
 
-    cmd = [
+    cmd = wrap + [
         "psql",
         "-U", "postgres",
         "--dbname", "immich",
@@ -41,7 +45,8 @@ def dbQuery(query: str) -> Any:
         "--command", query
     ]
 
-    proc = subprocess.run(wrap + cmd, check=True, capture_output=True)
+    log(f"Executing: {cmd}")
+    proc = subprocess.run(cmd, check=True, capture_output=True)
 
     rows: list[bytes] = proc.stdout.splitlines()
 
@@ -61,7 +66,8 @@ def dbQuery(query: str) -> Any:
         if i >= len(rows) - 1:
             break
 
-        records.append({x[0]: x[1].decode() for x in zip(fields, row.split(b"\0"))})
+        records.append({x[0]: x[1].decode()
+                        for x in zip(fields, row.split(b"\0"))})
 
     return records
 
