@@ -86,9 +86,9 @@ def updateDBChecksum(id: str, checksum: str) -> None:
     Update the checkum in the DB
     """
 
-    log("UPDATE \"asset\" "
-        f"SET \"checksum\" = decode('{checksum}', 'hex') "
-        f"WHERE \"id\" = '{id}';")
+    dbQuery("UPDATE \"asset\" "
+            f"SET \"checksum\" = decode('{checksum}', 'hex') "
+            f"WHERE \"id\" = '{id}';")
 
 
 def main() -> int:
