@@ -67,18 +67,18 @@ def dbQuery(query: str) -> Any:
     return records
 
 
-def getDBChecksum(id: str) -> str:
+def getDBChecksum(id: str) -> tuple[str, str]:
     """
     Fetch the assets checksum from the database
     """
-    assets = dbQuery("SELECT encode(\"checksum\", 'hex') "
+    assets = dbQuery("SELECT \"checksumAlgorithm\", encode(\"checksum\", 'hex') "
                      "FROM \"asset\" "
                      f"WHERE \"id\" = '{id}';")
 
     if len(assets) != 1:
         raise ValueError(f"Query returned {len(assets)} assets")
 
-    return assets[0]["encode"]
+    return assets[0]["checksumAlgorithm"], assets[0]["encode"],
 
 
 def updateDBChecksum(id: str, checksum: str) -> None:
@@ -99,13 +99,22 @@ def main() -> int:
             id = row["assetId"]
             path = pathlib.Path(row["path"])
             diskSha1 = sha1sum(path)
-            dbSha1 = getDBChecksum(id)
+            dbAlgo, dbSha1 = getDBChecksum(id)
 
-            if diskSha1 == dbSha1:
-                log(f"Checksum match {path} - skipping:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+            if dbAlgo != "sha1":
+                log(f"Unknown checksumAlgorithm ({path}) - skipping: {dbAlgo}")
                 continue
 
-            log(f"Checksum mismatch {path}:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
+            if diskSha1 == dbSha1:
+                log(f"Checksum match ({path}) - skipping:\n"
+                    f"  DB:   {dbSha1}\n"
+                    f"  Disk: {diskSha1}")
+                continue
+
+            log(f"Checksum mismatch ({path}):\n"
+                f"  DB:   {dbSha1}\n"
+                f"  Disk: {diskSha1}")
+
             match input("Update DB? [y/N] ").lower():
                 case "y":
                     updateDBChecksum(id, diskSha1)
