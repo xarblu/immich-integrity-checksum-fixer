@@ -45,12 +45,9 @@ def dbQuery(query: str) -> Any:
         "--command", query
     ]
 
-    log(f"Executing: {cmd}")
     proc = subprocess.run(cmd, check=True, capture_output=True)
 
     rows: list[bytes] = proc.stdout.splitlines()
-
-    log(f"Got rows: {rows}")
 
     # at least header + row count
     if len(rows) < 2:
