@@ -91,7 +91,7 @@ def main() -> int:
 
     for row in report:
         print(row)
-        asset = dbAsset(row["id"])
+        asset = dbAsset(row["assetId"])
         print(asset)
 
     return 0
