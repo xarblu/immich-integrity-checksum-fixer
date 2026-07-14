@@ -10,6 +10,7 @@ import hashlib
 import subprocess
 import csv
 import sys
+import argparse
 
 from typing import Any
 
@@ -71,16 +72,18 @@ def dbQuery(query: str) -> Any:
     return records
 
 
-def dbAsset(id: str) -> dict:
+def dbChecksum(id: str) -> str:
     """
-    Fetch the asset info from the database
+    Fetch the assets checksum from the database
     """
-    assets = dbQuery(f"SELECT * FROM \"asset\" WHERE \"id\" = '{id}';")
+    assets = dbQuery("SELECT encode(\"checksum\", 'hex') "
+                     "FROM \"asset\" "
+                     f"WHERE \"id\" = '{id}';")
 
     if len(assets) != 1:
         raise ValueError(f"Query returned {len(assets)} assets")
 
-    return assets[0]
+    return assets[0]["checksum"]
 
 
 def main() -> int:
@@ -88,9 +91,12 @@ def main() -> int:
         report = csv.DictReader(fd)
 
         for row in report:
-            print(row)
-            asset = dbAsset(row["assetId"])
-            print(asset)
+            path = pathlib.Path(row["path"])
+            diskSha1 = sha1sum(path)
+            dbSha1 = dbChecksum(row["assetId"])
+
+            if diskSha1 != dbSha1:
+                log(f"Checksum mismatch: DB: {dbSha1} Disk: {diskSha1}")
 
     return 0
 
