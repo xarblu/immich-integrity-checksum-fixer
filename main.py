@@ -111,7 +111,7 @@ def main() -> int:
                 continue
 
             log(f"Checksum mismatch {path}:\n  DB:   {dbSha1}\n  Disk: {diskSha1}")
-            match input("Update DB? [y/N]").lower():
+            match input("Update DB? [y/N] ").lower():
                 case "y":
                     updateDBChecksum(id, diskSha1)
                 case _:
